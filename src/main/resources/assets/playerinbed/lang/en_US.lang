@@ -1,0 +1,17 @@
+playerinbed.isinbedOK=§f%s§6 is in bed §a[%s%%]
+playerinbed.isinbedKO=§f%s§6 is in bed §c[%s%%]
+playerinbed.leftbedOk=§f%s§6 left bed §a[%s%%]
+playerinbed.leftbedKO=§f%s§6 left bed §c[%s%%]
+playerinbed.spawnchanged=§6Your spawn point has been set
+playerinbed.conf.enabled=Enable
+playerinbed.conf.enabled.tooltip=Enable night skipping
+playerinbed.conf.ratio=Ratio
+playerinbed.conf.ratio.tooltip=Percentage of players being asleep to start skipping night.
+playerinbed.conf.clearweather=Clear weather
+playerinbed.conf.clearweather.tooltip=Clear weather when skipping night
+playerinbed.conf.sendmessagetochat=Send chat message
+playerinbed.conf.sendmessagetochat.tooltip=Send chat message to all players when players go to bed.
+playerinbed.conf.sendmessagetostatus=Send status message
+playerinbed.conf.sendmessagetostatus.tooltip=Send status message to all players when players go to bed.
+playerinbed.conf.setspawnduringday=Set spawn pointd
+playerinbed.conf.setspawnduringday.tooltip=Allow players to set their spawn point during day by clicking on a bed

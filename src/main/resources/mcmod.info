@@ -1,0 +1,16 @@
+[
+{
+  "modid": "playersinbed",
+  "name": "Players In Bed",
+  "description": "Skip night without having all players in bed.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Vlaeh"],
+  "credits": "The Forge and FML guys, for making great job.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
