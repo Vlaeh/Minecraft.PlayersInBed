@@ -79,7 +79,13 @@ public class CommonProxy {
         	return;
         entityPlayer.setSpawnPoint(pos, false);
         entityPlayer.setSpawnChunk(pos, false, world.provider.getDimension());
-        entityPlayer.sendStatusMessage(new TextComponentString(PlayerInBed.i18n.format("playerinbed.spawnchanged")), false);
+        final TextComponentString text = new TextComponentString(PlayerInBed.i18n.format("playerinbed.spawnchanged"));
+        if (PlayerInBed.statusEnabled)
+            try { // Does not exist in 1.9
+                entityPlayer.sendStatusMessage(text, true);
+                return;
+            } catch (final NoSuchMethodError e) {};
+        entityPlayer.sendMessage(text);
     }
 
     @SubscribeEvent
@@ -109,10 +115,12 @@ public class CommonProxy {
 
     public final void sendMessageToPlayers(final World world, final ITextComponent text) {
         for (EntityPlayer player : world.playerEntities) {
-        	if (PlayerInBed.messageEnabled)
-        		player.sendMessage(text);
-        	if (PlayerInBed.statusEnabled)
-        		player.sendStatusMessage(text, true);
+            if (PlayerInBed.messageEnabled)
+                player.sendMessage(text);
+            if (PlayerInBed.statusEnabled)
+                try { // Does not exist in 1.9
+                    player.sendStatusMessage(text, true);
+                } catch (final NoSuchMethodError e) {};
         }
     }
 

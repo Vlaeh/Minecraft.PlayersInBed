@@ -13,5 +13,5 @@ playerinbed.conf.sendmessagetochat=Send chat message
 playerinbed.conf.sendmessagetochat.tooltip=Send chat message to all players when players go to bed.
 playerinbed.conf.sendmessagetostatus=Send status message
 playerinbed.conf.sendmessagetostatus.tooltip=Send status message to all players when players go to bed.
-playerinbed.conf.setspawnduringday=Set spawn pointd
+playerinbed.conf.setspawnduringday=Set spawn point
 playerinbed.conf.setspawnduringday.tooltip=Allow players to set their spawn point during day by clicking on a bed

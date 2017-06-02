@@ -16,11 +16,11 @@ import vlaeh.minecraft.forge.playersinbed.commands.PlayerInBedCommand;
      version = PlayerInBed.VERSION, 
      name = PlayerInBed.NAME, 
      acceptableRemoteVersions = "*", 
-     acceptedMinecraftVersions = "[1.10,1.12)", 
+     acceptedMinecraftVersions = "[1.9,1.12)", 
      guiFactory = "vlaeh.minecraft.forge.playersinbed.PlayerInBedGUIFactory")
 public class PlayerInBed 
 {
-    public static final String MODID = "playerinbed";
+    public static final String MODID = "playersinbed";
     public static final String VERSION = "1.2";
     public static final String NAME = "Player In Bed";
 	
