@@ -7,3 +7,7 @@ The mod has been tested with Minecraft 1.9, 1.10 and 1.11.
 ## Install
 
 Download latest release jar file and move to the "mods" directory of your Minecraft game
+
+## Configuration
+
+![Mod options](PlayersInBedConfig.png)
