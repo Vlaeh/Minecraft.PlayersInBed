@@ -21,7 +21,7 @@ import vlaeh.minecraft.forge.playersinbed.commands.PlayerInBedCommand;
 public class PlayerInBed 
 {
     public static final String MODID = "playersinbed";
-    public static final String VERSION = "1.2";
+    public static final String VERSION = "1.3";
     public static final String NAME = "Player In Bed";
 	
     public static Configuration config;
