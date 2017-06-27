@@ -16,7 +16,7 @@ import vlaeh.minecraft.forge.playersinbed.commands.PlayerInBedCommand;
      version = PlayerInBed.VERSION, 
      name = PlayerInBed.NAME, 
      acceptableRemoteVersions = "*", 
-     acceptedMinecraftVersions = "[1.9,1.12)", 
+     acceptedMinecraftVersions = "[1.9,1.13)", 
      guiFactory = "vlaeh.minecraft.forge.playersinbed.PlayerInBedGUIFactory")
 public class PlayerInBed 
 {
