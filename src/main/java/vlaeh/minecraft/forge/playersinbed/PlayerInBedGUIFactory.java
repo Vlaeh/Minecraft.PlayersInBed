@@ -8,34 +8,33 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 
 public class PlayerInBedGUIFactory implements IModGuiFactory {
 
-	@Override
-	public void initialize(Minecraft minecraftInstance) {
-	}
- 
-	@Override
-	public Class<? extends GuiScreen> mainConfigGuiClass() {
-		return PlayerInBedGUIConfig.class;
-	}
+    @Override
+    public void initialize(Minecraft minecraftInstance) {
+    }
 
-	@Override
-	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
-		return null;
-	}
+    @Override
+    public Class<? extends GuiScreen> mainConfigGuiClass() {
+        return PlayerInBedGUIConfig.class;
+    }
 
-	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(
-			RuntimeOptionCategoryElement element) {
-		return null;
-	}
+    @Override
+    public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
+        return null;
+    }
 
-	@Override
-	public boolean hasConfigGui() {
-		return true;
-	}
+    @Override
+    public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
+        return null;
+    }
 
-	@Override
-	public GuiScreen createConfigGui(GuiScreen parentScreen) {
-		return new PlayerInBedGUIConfig(parentScreen);
-	}
+    @Override
+    public boolean hasConfigGui() {
+        return true;
+    }
+
+    @Override
+    public GuiScreen createConfigGui(GuiScreen parentScreen) {
+        return new PlayerInBedGUIConfig(parentScreen);
+    }
 
 }

@@ -12,7 +12,7 @@ public class I18nClient implements I18nProxy {
 	}
 
 	@Override
-	public void load(final String lang) {
-	}
+    public void load(final String lang) {
+    }
 
 }
