@@ -1,8 +1,9 @@
 # MinecraftPlayersInBed
 
-This is a Minecraft server (and client hosting game) side mod for Forge that will automatically skip night when enough players are in bed (can be configured using Forge mod config interface).
+Mod for forge 1.13.2
 
-The mod has been tested with Minecraft 1.9, 1.10 and 1.11.
+This is a Minecraft server side and client hosting game mod for Forge.
+The mod will automatically skip night when enough players are in bed.
 
 ## Install
 
@@ -10,4 +11,8 @@ Download latest release jar file and move to the "mods" directory of your Minecr
 
 ## Configuration
 
-![Mod options](PlayersInBedConfig.png)
+[TODO] UI not yet available for 1.13
+
+Configuraiton is stored in file 'world/serverconfig/playersinbed-server.toml'
+
+Command '/playersInBed' can be used to change configuration parameters.

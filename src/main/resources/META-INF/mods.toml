@@ -1,0 +1,16 @@
+modLoader="javafml"
+loaderVersion="[25,)"
+[[mods]] #mandatory
+modId="playersinbed"
+version="1.4"
+displayName="Players In Bed"
+authors="Vlaeh"
+description='''
+Skip night without having all players in bed.
+'''
+[[dependencies.examplemod]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[25,)" #mandatory
+    ordering="NONE"
+    side="SERVER"

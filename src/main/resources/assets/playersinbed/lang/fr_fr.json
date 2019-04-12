@@ -1,0 +1,21 @@
+{
+    "playersinbed.isinbedOK": "§f%s§6 est au lit §a[%s%%]",
+    "playersinbed.isinbedKO": "§f%s§6 est au lit §c[%s%%]",
+    "playersinbed.leftbedOk": "§f%s§6 a quitté son lit §a[%s%%]",
+    "playersinbed.leftbedKO": "§f%s§6 a quitté son lit §c[%s%%]",
+    "playersinbed.spawnchanged": "§6Votre point d'apparition a été changé",
+    "playersinbed.conf.enabled": "Actif",
+    "playersinbed.conf.enabled.tooltip": "Active le module",
+    "playersinbed.conf.skipnight.tooltip": "Active le passage de la nuit",
+    "playersinbed.conf.ratio": "Ratio",
+    "playersinbed.conf.ratio.tooltip": "Pourcentage de joueurs endormis à partir duquel la nuit sera passée.",
+    "playersinbed.conf.clearweather": "Réinitialization météo",
+    "playersinbed.conf.clearweather.tooltip": "Réinitialize la météo après avoir fait passer la nuit.",
+    "playersinbed.conf.sendmessagetochat": "Message chat",
+    "playersinbed.conf.sendmessagetochat.tooltip": "Envoi un message aux joueurs lorsque des joueurs sont au lit.",
+    "playersinbed.conf.sendmessagetostatus": "Message status", 
+    "playersinbed.conf.sendmessagetostatus.tooltip": "Affiche un status aux joueurs lorsque des joueurs sont au lit", 
+    "playersinbed.conf.setspawnduringday": "Changer le point d'apparition",
+    "playersinbed.conf.setspawnduringday.tooltip": "Autoriser les joueurs durant la journée à changer leur point d'apparition en cliquant sur un lit.",
+    "playersinbed.conf.locale.tooltipr": "Langue utilisée pour les messages envoyés."
+}

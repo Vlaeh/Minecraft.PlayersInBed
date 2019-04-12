@@ -1,0 +1,21 @@
+{
+    "playersinbed.isinbedOK": "§f%s§6 is in bed §a[%s%%]",
+    "playersinbed.isinbedKO": "§f%s§6 is in bed §c[%s%%]",
+    "playersinbed.leftbedOk": "§f%s§6 left bed §a[%s%%]",
+    "playersinbed.leftbedKO": "§f%s§6 left bed §c[%s%%]",
+    "playersinbed.spawnchanged": "§6Your spawn point has been set",
+    "playersinbed.conf.enabled": "Enable",
+    "playersinbed.conf.enabled.tooltip": "Mod enabled",
+    "playersinbed.conf.skipnight.tooltip": "Enable night skipping",
+    "playersinbed.conf.ratio": "Ratio",
+    "playersinbed.conf.ratio.tooltip": "Percentage of players being asleep to start skipping night.",
+    "playersinbed.conf.clearweather": "Clear weather",
+    "playersinbed.conf.clearweather.tooltip": "Clear weather when skipping night",
+    "playersinbed.conf.sendmessagetochat": "Send chat message",
+    "playersinbed.conf.sendmessagetochat.tooltip": "Send chat message to all players when players go to bed.",
+    "playersinbed.conf.sendmessagetostatus": "Send status message",
+    "playersinbed.conf.sendmessagetostatus.tooltip": "Send status message to all players when players go to bed.",
+    "playersinbed.conf.setspawnduringday": "Set spawn point",
+    "playersinbed.conf.setspawnduringday.tooltip": "Allow players to set their spawn point during day by clicking on a bed",
+    "playersinbed.conf.locale.tooltipr": "Server locale used to send messages"
+}
