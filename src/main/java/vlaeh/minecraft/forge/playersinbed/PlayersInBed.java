@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import vlaeh.minecraft.forge.playersinbed.server.I18nLanguageHook;
 
@@ -22,6 +23,8 @@ public class PlayersInBed
     public static final Logger LOGGER = LogManager.getLogger();
     public static I18nLanguageHook i18n = new I18nLanguageHook().loadLanguage(MODID, "en_us");
 
+    private PlayersInBedServerSide serverSide = null;
+
     public PlayersInBed() {
         LOGGER.debug("Creating Player In Bed mod");
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PlayersInBedConfig.serverSpec);
@@ -30,7 +33,7 @@ public class PlayersInBed
     }
 
     @SubscribeEvent
-    public void serverStarting(FMLServerStartingEvent event) {
+    public void serverStarting(final FMLServerStartingEvent event) {
         LOGGER.info("Server starting");
         PlayersInBedServerCommand.registerAll(event.getCommandDispatcher());
     }
@@ -38,8 +41,16 @@ public class PlayersInBed
     @SubscribeEvent
     public void serverStarted(final FMLServerStartedEvent event) {
         LOGGER.info("Server started");
-        MinecraftForge.EVENT_BUS.register(new PlayersInBedServerSide());
+        serverSide = new PlayersInBedServerSide();
+        MinecraftForge.EVENT_BUS.register(serverSide);
     }
+
+    @SubscribeEvent
+    public void serverStopped(final FMLServerStoppedEvent event) {
+        LOGGER.info("Server stopped");
+        MinecraftForge.EVENT_BUS.unregister(serverSide);
+    }
+
 
     @SubscribeEvent
     public void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent event) {
