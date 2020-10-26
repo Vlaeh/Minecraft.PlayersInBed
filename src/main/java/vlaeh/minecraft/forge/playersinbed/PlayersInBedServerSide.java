@@ -2,15 +2,15 @@ package vlaeh.minecraft.forge.playersinbed;
 
 import java.util.HashSet;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
+import net.minecraft.world.storage.IWorldInfo;
+import net.minecraft.world.storage.ServerWorldInfo;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.event.entity.player.SleepingLocationCheckEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -19,14 +19,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class PlayersInBedServerSide {
     private final HashSet<String> playersInBed = new HashSet<String>();
 
-    private final int getSleepingPercent(final EntityPlayer player, int startCount) {
-        final DimensionType dimension = player.dimension;
+    private final int getSleepingPercent(final PlayerEntity player, int startCount) {
+        final RegistryKey<World> dimension = player.world.getDimensionKey();
         int playersCount = 0;
-        for (final EntityPlayer p : player.world.playerEntities) {
-            if (p.dimension != dimension)
+        for (final PlayerEntity p : player.world.getPlayers()) {
+            if (p.world.getDimensionKey() != dimension)
                 continue;
-            playersCount++;
-            if (p.isPlayerSleeping())
+            if (! p.isCreative() && ! p.isSpectator())
+                playersCount++;
+            if (p.isSleeping())
                 startCount++;
         }
         if (startCount <= 0)
@@ -38,9 +39,9 @@ public class PlayersInBedServerSide {
     public void onPlayerWakeUpEvent(final PlayerWakeUpEvent event) {
         if (! PlayersInBedConfig.enabled)
             return;
-        final EntityPlayer entityPlayer = event.getEntityPlayer();
+        final PlayerEntity entityPlayer = event.getPlayer();
         PlayersInBed.LOGGER.info("onPlayerWakeUpEvent {} {}", entityPlayer, entityPlayer.world.getDayTime());
-        if (! (entityPlayer instanceof EntityPlayerMP))
+        if (! (entityPlayer instanceof ServerPlayerEntity))
             return; // Note: also triggered on client side when hosting the game
         final String name = entityPlayer.getScoreboardName();
         if (playersInBed.remove(name)) {
@@ -48,42 +49,22 @@ public class PlayersInBedServerSide {
                 final int ratio = getSleepingPercent(entityPlayer, -1);
                 if (ratio >= PlayersInBedConfig.ratio)
                     sendMessageToPlayers(entityPlayer.world,
-                            new TextComponentTranslation(PlayersInBed.i18n.translateKey("playersinbed.leftbedOK"), name, ratio));
+                            new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.leftbedOK"), name, ratio));
                 else
                     sendMessageToPlayers(entityPlayer.world,
-                            new TextComponentTranslation(PlayersInBed.i18n.translateKey("playersinbed.leftbedKO"), name, ratio));
+                            new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.leftbedKO"), name, ratio));
             }
         }
-    }
-
-    @SubscribeEvent
-    public void onPlayerSleepInBedEvent(final PlayerSleepInBedEvent event) {
-        if ( (! PlayersInBedConfig.enabled)
-             || (! PlayersInBedConfig.setSpawnDuringDayEnabled) )
-            return;
-        final EntityPlayer entityPlayer = event.getEntityPlayer();
-        final World world = entityPlayer.getEntityWorld();
-        PlayersInBed.LOGGER.info("onPlayerSleepInBedEvent {} {}", entityPlayer, entityPlayer.world.getDayTime());
-        if ( world.isRemote 
-                || ! world.isDaytime()
-                || entityPlayer.isSneaking() 
-                || ! world.getDimension().canRespawnHere() )
-            return;
-        final BlockPos pos = event.getPos();
-        final BlockPos currentBedLocation = entityPlayer.getBedLocation(entityPlayer.dimension);
-        if ((currentBedLocation != null) && (currentBedLocation.getDistance(pos.getX(), pos.getY(), pos.getZ()) <= 4))
-            return;
-        entityPlayer.setSpawnPoint(pos, false, entityPlayer.dimension);
-        entityPlayer.bedLocation = pos;
-        final TextComponentTranslation text = new TextComponentTranslation(PlayersInBed.i18n.translateKey("playersinbed.spawnchanged"));
-        sendMessageToPlayer(entityPlayer, text);
     }
 
     @SubscribeEvent
     public void onSleepingLocationCheckEvent(final SleepingLocationCheckEvent event) {
         if (! PlayersInBedConfig.enabled)
             return;
-        final EntityPlayer entityPlayer = event.getEntityPlayer();
+        final Entity entity = event.getEntity();
+        if (! (entity instanceof PlayerEntity))
+            return;
+        final PlayerEntity entityPlayer = (PlayerEntity)entity;
         final String name = entityPlayer.getScoreboardName();
         final int ratio = getSleepingPercent(entityPlayer, 0);
         PlayersInBed.LOGGER.info("onSleepingLocationCheckEvent {}", entityPlayer);
@@ -93,10 +74,10 @@ public class PlayersInBedServerSide {
             // TODO: add click action & command to kick players out of bed
             if (ratio >= PlayersInBedConfig.ratio)
                 sendMessageToPlayers(entityPlayer.world,
-                        new TextComponentTranslation(PlayersInBed.i18n.translateKey("playersinbed.isinbedOK"), name, ratio));
+                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.isinbedOK"), name, ratio));
             else
                 sendMessageToPlayers(entityPlayer.world,
-                        new TextComponentTranslation(PlayersInBed.i18n.translateKey("playersinbed.isinbedKO"), name, ratio));
+                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.isinbedKO"), name, ratio));
         }
 
         if (PlayersInBedConfig.skipNightEnabled 
@@ -106,10 +87,15 @@ public class PlayersInBedServerSide {
             final long daytime = worldTime % 24000L;
             final long shifttime = 24000L - daytime;
             if (shifttime < 12000L) { // Ensure we are not skipping another day.
-                entityPlayer.world.setDayTime(worldTime + shifttime);
-                PlayersInBed.LOGGER.debug("TIME CHANGE: {} / {} : + {}", worldTime, daytime, shifttime);
+                final IWorldInfo w = entityPlayer.getEntityWorld().getWorldInfo();
+                if ((w == null) || (! (w instanceof ServerWorldInfo))) {
+                    PlayersInBed.LOGGER.error("Incompatible world type {} for player {}", entityPlayer, w);
+                    return;
+                }
+                final ServerWorldInfo worldInfo = (ServerWorldInfo)w;
+                worldInfo.setDayTime(worldTime + shifttime);
+                PlayersInBed.LOGGER.info("TIME CHANGE: {} / {} : + {}", worldTime, daytime, shifttime);
                 if (PlayersInBedConfig.clearWeatherEnabled) {
-                    final WorldInfo worldInfo = entityPlayer.world.getWorldInfo();
                     worldInfo.setClearWeatherTime(6000);
                     worldInfo.setRainTime(0);
                     worldInfo.setThunderTime(0);
@@ -121,16 +107,16 @@ public class PlayersInBedServerSide {
         }
     }
     
-    private final static void sendMessageToPlayer(final EntityPlayer player, final ITextComponent text) {
+    private final static void sendMessageToPlayer(final PlayerEntity player, final ITextComponent text) {
         if (PlayersInBedConfig.notifyToChatEnabled)
-            player.sendMessage(text);
+            player.sendMessage(text, player.getUniqueID());
         if (PlayersInBedConfig.notifyToStatusEnabled)
             player.sendStatusMessage(text, true);
         // [TODO] status not working, use /title ?
     }
 
     private final static void sendMessageToPlayers(final World world, final ITextComponent text) {
-        for (EntityPlayer player : world.playerEntities)
+        for (PlayerEntity player : world.getPlayers())
             sendMessageToPlayer(player, text);
     }
 

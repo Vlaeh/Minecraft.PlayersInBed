@@ -9,10 +9,11 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.config.ModConfig;
 
 public class PlayersInBedConfig {
 
-    public static final String SET_SPAWN_DURING_DAY_STR = "setSpawnDuringDay";
     public static final String NOTIFY_TO_STATUS_STR = "notifyToStatus";
     public static final String NOTIFY_TO_CHAT_STR = "notifyToChat";
     public static final String CLEAR_WEATHER_STR = "clearWeather";
@@ -26,7 +27,6 @@ public class PlayersInBedConfig {
     public static boolean notifyToChatEnabled = true;
     public static boolean notifyToStatusEnabled = false;
     public static boolean clearWeatherEnabled = true;
-    public static boolean setSpawnDuringDayEnabled = true;
     public static int ratio = 30;
     public static String locale = "en_us";
 
@@ -35,7 +35,6 @@ public class PlayersInBedConfig {
     private final BooleanValue notifyToChatEnabled_c;
     private final BooleanValue notifyToStatusEnabled_c;
     private final BooleanValue clearWeatherEnabled_c;
-    private final BooleanValue setSpawnDuringDayEnabled_c;
     private final IntValue ratio_c;
     private final ConfigValue<String> locale_c;
     private CommentedFileConfig fileConfig = null;
@@ -81,11 +80,6 @@ public class PlayersInBedConfig {
             .translation("playersinbed.conf.sendmessagetostatus.tooltipr")
             .define(NOTIFY_TO_STATUS_STR, notifyToStatusEnabled);
 
-        setSpawnDuringDayEnabled_c = builder
-            .comment("Set spawn point when clicking bed during the day.")
-            .translation("playersinbed.conf.setspawnduringday.tooltipr")
-            .define(SET_SPAWN_DURING_DAY_STR, setSpawnDuringDayEnabled);
-
         locale_c = builder
                 .comment("Server locale to use.")
                 .translation("playersinbed.conf.locale.tooltipr")
@@ -93,7 +87,8 @@ public class PlayersInBedConfig {
     }
     
     public synchronized void load(final CommentedConfig commentedConfig) {
-        PlayersInBed.LOGGER.debug("Updating configuration");
+        PlayersInBed.LOGGER.info("Loading configuration " + commentedConfig);
+        PlayersInBed.LOGGER.info("Loading configuration " + commentedConfig.getClass());
         if (commentedConfig instanceof CommentedFileConfig) {
             fileConfig = (CommentedFileConfig) commentedConfig;
             fileConfig.load(); // Note: file is not reloaded automatically
@@ -103,7 +98,6 @@ public class PlayersInBedConfig {
         notifyToChatEnabled = notifyToChatEnabled_c.get();
         notifyToStatusEnabled = notifyToStatusEnabled_c.get();
         clearWeatherEnabled = clearWeatherEnabled_c.get();
-        setSpawnDuringDayEnabled = setSpawnDuringDayEnabled_c.get();
         ratio = ratio_c.get();
         locale = locale_c.get();
         PlayersInBed.i18n.loadLanguage(PlayersInBed.MODID, locale);
@@ -118,6 +112,8 @@ public class PlayersInBedConfig {
     // Note: "synchronized" is to avoid configuration from being reloaded
     //       and values not yet set from being reset
     public synchronized void save() {
+        PlayersInBed.LOGGER.info("Saving configuration");
+        PlayersInBed.LOGGER.info("File config: " + fileConfig);
         if (fileConfig == null) 
             return;
         PlayersInBed.LOGGER.debug("Saving configuration");
@@ -126,9 +122,23 @@ public class PlayersInBedConfig {
         changeValue(notifyToChatEnabled_c, notifyToChatEnabled);
         changeValue(notifyToStatusEnabled_c, notifyToStatusEnabled);
         changeValue(clearWeatherEnabled_c, clearWeatherEnabled);
-        changeValue(setSpawnDuringDayEnabled_c, setSpawnDuringDayEnabled);
         changeValue(ratio_c, ratio);
         changeValue(locale_c, locale);
     }
+
+    @SubscribeEvent
+    public static void onLoad(final ModConfig.Loading configEvent) {
+        final ModConfig config = configEvent.getConfig();
+        PlayersInBed.LOGGER.info("Loading configuration {}", config);
+        instance.load(config.getConfigData());
+    }
+
+    @SubscribeEvent
+    public static void onFileChange(final ModConfig.Reloading configEvent) {
+        final ModConfig config = configEvent.getConfig();
+        PlayersInBed.LOGGER.info("Reloading configuration {}", config);
+        instance.load(config.getConfigData());
+    }
+
 
 }

@@ -10,7 +10,7 @@ import com.mojang.brigadier.context.CommandContext;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 
 public class PlayersInBedServerCommand {
     
@@ -24,18 +24,17 @@ public class PlayersInBedServerCommand {
             .then(registerNotifyToChat())
             .then(registerNotifyToStatus())
             .then(registerClearWeather())
-            .then(registerSetSpawnDuringDay())
             .then(registerRatio())
             .then(registerLocale())
             .executes(ctx -> {
-                ctx.getSource().sendFeedback(new TextComponentString("§ePlayers In Bed§f:\n - §e" + PlayersInBedConfig.ENABLE_STR +  "§f: " + PlayersInBedConfig.enabled + "\n - §e" + PlayersInBedConfig.CLEAR_WEATHER_STR + "§f: " + PlayersInBedConfig.clearWeatherEnabled + "\n - §e" + PlayersInBedConfig.RATIO_STR + "§f: " + PlayersInBedConfig.ratio + " %"), true);
+                ctx.getSource().sendFeedback(new StringTextComponent("§ePlayers In Bed§f:\n - §e" + PlayersInBedConfig.ENABLE_STR +  "§f: " + PlayersInBedConfig.enabled + "\n - §e" + PlayersInBedConfig.CLEAR_WEATHER_STR + "§f: " + PlayersInBedConfig.clearWeatherEnabled + "\n - §e" + PlayersInBedConfig.RATIO_STR + "§f: " + PlayersInBedConfig.ratio + " %"), true);
                 return 0;
             })
         );
     }
     
     private final static int sendfeecback(final CommandContext<CommandSource> ctx, final String name, final Object value) {
-        ctx.getSource().sendFeedback(new TextComponentString("§e" + name + "§f = " + value), true);
+        ctx.getSource().sendFeedback(new StringTextComponent("§e" + name + "§f = " + value), true);
         return 0;
     }
     
@@ -116,22 +115,6 @@ public class PlayersInBedServerCommand {
                 )
                 .executes(ctx -> {
                     return sendfeecback(ctx, PlayersInBedConfig.CLEAR_WEATHER_STR, PlayersInBedConfig.clearWeatherEnabled);
-                });
-    }
-
-    static ArgumentBuilder<CommandSource, ?> registerSetSpawnDuringDay()
-    {
-        return Commands.literal(PlayersInBedConfig.SET_SPAWN_DURING_DAY_STR)
-                .requires(cs -> cs.hasPermissionLevel(2))
-                .then(Commands.argument("status", BoolArgumentType.bool())
-                    .executes(ctx -> {
-                        PlayersInBedConfig.setSpawnDuringDayEnabled = BoolArgumentType.getBool(ctx, "status");
-                        PlayersInBedConfig.instance.save();
-                        return sendfeecback(ctx, PlayersInBedConfig.SET_SPAWN_DURING_DAY_STR, PlayersInBedConfig.setSpawnDuringDayEnabled);
-                    })
-                )
-                .executes(ctx -> {
-                    return sendfeecback(ctx, PlayersInBedConfig.SET_SPAWN_DURING_DAY_STR, PlayersInBedConfig.setSpawnDuringDayEnabled);
                 });
     }
 

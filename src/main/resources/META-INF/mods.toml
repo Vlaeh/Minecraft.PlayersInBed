@@ -1,16 +1,27 @@
 modLoader="javafml"
-loaderVersion="[25,)"
-[[mods]] #mandatory
-modId="playersinbed"
-version="1.4"
-displayName="Players In Bed"
-authors="Vlaeh"
-description='''
-Skip night without having all players in bed.
-'''
-[[dependencies.examplemod]] #optional
-    modId="forge" #mandatory
-    mandatory=true #mandatory
-    versionRange="[25,)" #mandatory
+loaderVersion="[${javafml_min},${javafml_max})"
+license="MIT"
+
+[[mods]]
+    modId="playersinbed"
+    version="${version}"
+    displayName="Players in Bed"
+    authors="Vlaeh"
+    description='''
+A little of this, a little of that, a lot of tinkering, and a lot of tools
+    '''
+
+[[dependencies.playersinbed]]
+    modId="forge"
+    mandatory=true
+    versionRange="[${forge_version_min},${forge_version_max})"
     ordering="NONE"
-    side="SERVER"
+    side="BOTH"
+
+[[dependencies.playersinbed]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[${minecraft_version_min},${minecraft_version_max})"
+    ordering="NONE"
+    side="BOTH"
+
