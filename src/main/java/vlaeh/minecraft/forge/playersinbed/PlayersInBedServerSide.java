@@ -19,20 +19,28 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class PlayersInBedServerSide {
     private final HashSet<String> playersInBed = new HashSet<String>();
 
-    private final int getSleepingPercent(final PlayerEntity player, int startCount) {
+    private final int getSleepingPercent(final PlayerEntity player, int sleepingCount) {
         final RegistryKey<World> dimension = player.world.getDimensionKey();
         int playersCount = 0;
+        int activeCount = 0;
         for (final PlayerEntity p : player.world.getPlayers()) {
             if (p.world.getDimensionKey() != dimension)
                 continue;
+            playersCount++;
             if (! p.isCreative() && ! p.isSpectator())
-                playersCount++;
+                activeCount++;
             if (p.isSleeping())
-                startCount++;
+                sleepingCount++;
         }
-        if (startCount <= 0)
+        if (sleepingCount <= 0)
             return 0;
-        return (startCount * 100) / playersCount;
+        if (playersCount == sleepingCount)
+            return 100; // All sleeping: let Minecraft skip the night
+        if (activeCount == 0)
+            return (sleepingCount * 100) / playersCount;
+        if (sleepingCount == activeCount)
+            return 99;
+        return (sleepingCount * 100) / activeCount;
     }
 
     @SubscribeEvent
@@ -40,7 +48,7 @@ public class PlayersInBedServerSide {
         if (! PlayersInBedConfig.enabled)
             return;
         final PlayerEntity entityPlayer = event.getPlayer();
-        PlayersInBed.LOGGER.info("onPlayerWakeUpEvent {} {}", entityPlayer, entityPlayer.world.getDayTime());
+        PlayersInBed.LOGGER.debug("onPlayerWakeUpEvent {} {}", entityPlayer, entityPlayer.world.getDayTime());
         if (! (entityPlayer instanceof ServerPlayerEntity))
             return; // Note: also triggered on client side when hosting the game
         final String name = entityPlayer.getScoreboardName();
@@ -67,8 +75,7 @@ public class PlayersInBedServerSide {
         final PlayerEntity entityPlayer = (PlayerEntity)entity;
         final String name = entityPlayer.getScoreboardName();
         final int ratio = getSleepingPercent(entityPlayer, 0);
-        PlayersInBed.LOGGER.info("onSleepingLocationCheckEvent {}", entityPlayer);
-        PlayersInBed.LOGGER.info("onSleepingLocationCheckEvent {} {} {}", entityPlayer.world.getDayTime(), entityPlayer.world.getGameTime(), entityPlayer.world.isDaytime(), entityPlayer.world.isThundering());
+        PlayersInBed.LOGGER.debug("onSleepingLocationCheckEvent {} {} {}", entityPlayer.world.getDayTime(), entityPlayer.world.getGameTime(), entityPlayer.world.isDaytime(), entityPlayer.world.isThundering());
 
         if (playersInBed.add(name)) {
             // TODO: add click action & command to kick players out of bed
@@ -81,20 +88,24 @@ public class PlayersInBedServerSide {
         }
 
         if (PlayersInBedConfig.skipNightEnabled 
-                && (ratio >= PlayersInBedConfig.ratio) && (ratio < 100)
+                && (ratio >= PlayersInBedConfig.ratio)
+                && (ratio != 100)
                 && entityPlayer.isPlayerFullyAsleep()) {
-            final long worldTime = entityPlayer.world.getDayTime();
+            PlayersInBed.LOGGER.debug("TIME is to be changed {} >= {}", ratio, PlayersInBedConfig.ratio);
+            final IWorldInfo w = entityPlayer.getEntityWorld().getWorldInfo();
+            if ((w == null) || (! (w instanceof ServerWorldInfo))) {
+                PlayersInBed.LOGGER.error("Incompatible world type {} for player {}", entityPlayer, w);
+                return;
+            }
+            final ServerWorldInfo worldInfo = (ServerWorldInfo)w;
+            final long worldTime = worldInfo.getDayTime();
             final long daytime = worldTime % 24000L;
             final long shifttime = 24000L - daytime;
             if (shifttime < 12000L) { // Ensure we are not skipping another day.
-                final IWorldInfo w = entityPlayer.getEntityWorld().getWorldInfo();
-                if ((w == null) || (! (w instanceof ServerWorldInfo))) {
-                    PlayersInBed.LOGGER.error("Incompatible world type {} for player {}", entityPlayer, w);
-                    return;
-                }
-                final ServerWorldInfo worldInfo = (ServerWorldInfo)w;
+                PlayersInBed.LOGGER.debug("TIME CHANGE: {} / {} : + {}", worldTime, daytime, shifttime);
+                sendMessageToPlayers(entityPlayer.world,
+                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.passingnight")));
                 worldInfo.setDayTime(worldTime + shifttime);
-                PlayersInBed.LOGGER.info("TIME CHANGE: {} / {} : + {}", worldTime, daytime, shifttime);
                 if (PlayersInBedConfig.clearWeatherEnabled) {
                     worldInfo.setClearWeatherTime(6000);
                     worldInfo.setRainTime(0);
@@ -112,7 +123,6 @@ public class PlayersInBedServerSide {
             player.sendMessage(text, player.getUniqueID());
         if (PlayersInBedConfig.notifyToStatusEnabled)
             player.sendStatusMessage(text, true);
-        // [TODO] status not working, use /title ?
     }
 
     private final static void sendMessageToPlayers(final World world, final ITextComponent text) {

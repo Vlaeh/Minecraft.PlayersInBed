@@ -35,20 +35,20 @@ public class PlayersInBed
 
     @SubscribeEvent
     public void serverStarting(final FMLServerStartingEvent event) {
-        LOGGER.info("Server starting");
+        LOGGER.info("@@@ Server starting");
         PlayersInBedServerCommand.registerAll(event.getServer().getCommandManager().getDispatcher());
     }
 
     @SubscribeEvent
     public void serverStarted(final FMLServerStartedEvent event) {
-        LOGGER.info("Server started");
+        LOGGER.info("@@@ Server started");
         serverSide = new PlayersInBedServerSide();
         MinecraftForge.EVENT_BUS.register(serverSide);
     }
 
     @SubscribeEvent
     public void serverStopped(final FMLServerStoppedEvent event) {
-        LOGGER.info("Server stopped");
+        LOGGER.info("@@@ Server stopped");
         MinecraftForge.EVENT_BUS.unregister(serverSide);
     }
 
