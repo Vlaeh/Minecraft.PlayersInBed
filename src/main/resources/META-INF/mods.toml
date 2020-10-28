@@ -16,12 +16,12 @@ A little of this, a little of that, a lot of tinkering, and a lot of tools
     mandatory=true
     versionRange="[${forge_version_min},${forge_version_max})"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.playersinbed]]
     modId="minecraft"
     mandatory=true
     versionRange="[${minecraft_version_min},${minecraft_version_max})"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
