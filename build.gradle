@@ -18,8 +18,8 @@ ext.artifact_version = 'NFG'
 artifact_version = "${mod_version}"
 version = "${minecraft_version}-${mod_version}"
 
-group = 'vlaeh.minecraft.forge.playersinbed'
-archivesBaseName = 'PlayersInBed'
+group = "${mod_group}"
+archivesBaseName = "${mod_name}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -108,7 +108,8 @@ processResources {
         expand 'version': artifact_version,
             'minecraft_version_min': minecraft_version_min, 'minecraft_version_max': minecraft_version_max,
             'forge_version_min': forge_version_min, 'forge_version_max': forge_version_max,
-            'javafml_min': javafml_min, 'javafml_max': javafml_max
+            'javafml_min': javafml_min, 'javafml_max': javafml_max,
+            'mod_id': mod_id, 'mod_title': mod_title, 'mod_author': mod_author 
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -120,8 +121,8 @@ processResources {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "Players In Bed",
-            "Specification-Vendor": "Players In Bed",
+            "Specification-Title": "${mod_title}",
+            "Specification-Vendor": "${mod_title}",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",

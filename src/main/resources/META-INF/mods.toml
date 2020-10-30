@@ -3,22 +3,23 @@ loaderVersion="[${javafml_min},${javafml_max})"
 license="MIT"
 
 [[mods]]
-    modId="playersinbed"
+    modId="${mod_id}"
     version="${version}"
-    displayName="Players in Bed"
-    authors="Vlaeh"
+    displayName="${mod_title}"
+    authors="${mod_author}"
     description='''
-A little of this, a little of that, a lot of tinkering, and a lot of tools
+Night will be skipped when enough players are in bed.
+Command "/playersInBed" can be used to get mod status or configure mod options.  
     '''
 
-[[dependencies.playersinbed]]
+[[dependencies.${mod_id}]]
     modId="forge"
     mandatory=true
     versionRange="[${forge_version_min},${forge_version_max})"
     ordering="NONE"
     side="SERVER"
 
-[[dependencies.playersinbed]]
+[[dependencies.${mod_id}]]
     modId="minecraft"
     mandatory=true
     versionRange="[${minecraft_version_min},${minecraft_version_max})"
