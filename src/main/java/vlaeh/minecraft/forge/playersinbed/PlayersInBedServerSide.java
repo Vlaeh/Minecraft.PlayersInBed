@@ -8,7 +8,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.ServerWorldInfo;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
@@ -24,10 +26,12 @@ public class PlayersInBedServerSide {
         int playersCount = 0;
         int activeCount = 0;
         for (final PlayerEntity p : player.world.getPlayers()) {
+            if (p.isSpectator())
+                continue;
             if (p.world.getDimensionKey() != dimension)
                 continue;
             playersCount++;
-            if (! p.isCreative() && ! p.isSpectator())
+            if (! p.isCreative())
                 activeCount++;
             if (p.isSleeping())
                 sleepingCount++;
@@ -35,11 +39,11 @@ public class PlayersInBedServerSide {
         if (sleepingCount <= 0)
             return 0;
         if (playersCount == sleepingCount)
-            return 100; // All sleeping: let Minecraft skip the night
-        if (activeCount == 0)
+            return 101; // All sleeping: let Minecraft skip the night
+        if (activeCount == 0) // All players in creative mode
             return (sleepingCount * 100) / playersCount;
-        if (sleepingCount == activeCount)
-            return 99;
+        if (sleepingCount >= activeCount)
+            return 100;
         return (sleepingCount * 100) / activeCount;
     }
 
@@ -57,10 +61,10 @@ public class PlayersInBedServerSide {
                 final int ratio = getSleepingPercent(entityPlayer, -1);
                 if (ratio >= PlayersInBedConfig.ratio)
                     sendMessageToPlayers(entityPlayer.world,
-                            new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.leftbedOK"), name, ratio));
+                            new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.leftbedOK"), name, ratio > 100 ? 100 : ratio));
                 else
                     sendMessageToPlayers(entityPlayer.world,
-                            new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.leftbedKO"), name, ratio));
+                            new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.leftbedKO"), name, ratio > 100 ? 100 : ratio));
             }
         }
     }
@@ -75,42 +79,46 @@ public class PlayersInBedServerSide {
         final PlayerEntity entityPlayer = (PlayerEntity)entity;
         final String name = entityPlayer.getScoreboardName();
         final int ratio = getSleepingPercent(entityPlayer, 0);
-        PlayersInBed.LOGGER.debug("onSleepingLocationCheckEvent {} {} {}", entityPlayer.world.getDayTime(), entityPlayer.world.getGameTime(), entityPlayer.world.isDaytime(), entityPlayer.world.isThundering());
+        PlayersInBed.LOGGER.debug("onSleepingLocationCheckEvent {}, dayTime={}, gameTime={}, ratio={}", entityPlayer, entityPlayer.world.getDayTime(), entityPlayer.world.getGameTime(), ratio);
 
         if (playersInBed.add(name)) {
             // TODO: add click action & command to kick players out of bed
             if (ratio >= PlayersInBedConfig.ratio)
                 sendMessageToPlayers(entityPlayer.world,
-                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.isinbedOK"), name, ratio));
+                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.isinbedOK"), name, ratio > 100 ? 100 : ratio));
             else
                 sendMessageToPlayers(entityPlayer.world,
-                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.isinbedKO"), name, ratio));
+                        new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.isinbedKO"), name, ratio > 100 ? 100 : ratio));
         }
 
         if (PlayersInBedConfig.skipNightEnabled 
                 && (ratio >= PlayersInBedConfig.ratio)
-                && (ratio != 100)
+                && (ratio != 101)
                 && entityPlayer.isPlayerFullyAsleep()) {
             PlayersInBed.LOGGER.debug("TIME is to be changed {} >= {}", ratio, PlayersInBedConfig.ratio);
-            final IWorldInfo w = entityPlayer.getEntityWorld().getWorldInfo();
-            if ((w == null) || (! (w instanceof ServerWorldInfo))) {
-                PlayersInBed.LOGGER.error("Incompatible world type {} for player {}", entityPlayer, w);
+            final World world = entityPlayer.getEntityWorld();
+            final IWorldInfo wi = world.getWorldInfo();
+            if ((wi == null) || (! (wi instanceof ServerWorldInfo))) {
+                PlayersInBed.LOGGER.error("Incompatible world type {} for player {}", entityPlayer, wi);
                 return;
             }
-            final ServerWorldInfo worldInfo = (ServerWorldInfo)w;
+            final ServerWorldInfo worldInfo = (ServerWorldInfo)wi;
             final long worldTime = worldInfo.getDayTime();
             final long daytime = worldTime % 24000L;
             final long shifttime = 24000L - daytime;
-            if (shifttime < 12000L) { // Ensure we are not skipping another day.
+            if ((shifttime < 12000L) // Ensure another mod is not making us skip several nights
+                    || (worldInfo.isThundering()) && shifttime < 23000L) { // Skip thunder 
                 PlayersInBed.LOGGER.debug("TIME CHANGE: {} / {} : + {}", worldTime, daytime, shifttime);
                 sendMessageToPlayers(entityPlayer.world,
                         new TranslationTextComponent(PlayersInBed.i18n.translateKey("playersinbed.passingnight")));
-                worldInfo.setDayTime(worldTime + shifttime);
-                if (PlayersInBedConfig.clearWeatherEnabled) {
-                    worldInfo.setClearWeatherTime(6000);
+                if (world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)) {
+                    worldInfo.setDayTime(net.minecraftforge.event.ForgeEventFactory.onSleepFinished((ServerWorld)world, worldTime + shifttime, worldTime));
+                }
+                if (PlayersInBedConfig.clearWeatherEnabled
+                        && world.getGameRules().getBoolean(GameRules.DO_WEATHER_CYCLE)) {
                     worldInfo.setRainTime(0);
-                    worldInfo.setThunderTime(0);
                     worldInfo.setRaining(false);
+                    worldInfo.setThunderTime(0);
                     worldInfo.setThundering(false);
                 }
                 event.setResult(Result.DENY);

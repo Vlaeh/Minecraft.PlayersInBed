@@ -12,6 +12,6 @@ Download latest release jar file and move to the "mods" directory of your Minecr
 ## Configuration
 
 Configuraiton is stored in file 'world/serverconfig/playersinbed-server.toml'
-Configuration is automatically updated when file is changed.
+Configuration is automatically reloaded when file on disk is changed.
 
-Command '/playersInBed' can be used to change configuration parameters.
+Command '/playersInBed' can be used to get mod status or change configuration parameters.
